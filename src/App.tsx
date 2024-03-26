@@ -45,9 +45,9 @@ function App() {
           </TableHead>
           <TableBody>
             {dataArray &&
-              dataArray.map((element, index) => (
+              dataArray.map((element) => (
                 <TableRow
-                  key={index}
+                  key={element.name}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <TableCell component="th" scope="row">
