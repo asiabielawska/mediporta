@@ -3,20 +3,20 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import { useState } from "react";
 
 type Props = {
   label: string;
   arrayValues: string[];
+  value: string;
+  handleChange: (event: SelectChangeEvent) => void;
 };
 
-export default function BasicSelect({ label, arrayValues }: Props) {
-  const [value, setValue] = useState("");
-
-  const handleChange = (event: SelectChangeEvent) => {
-    setValue(event.target.value as string);
-  };
-
+export default function BasicSelect({
+  label,
+  arrayValues,
+  value,
+  handleChange,
+}: Props) {
   return (
     <Box sx={{ minWidth: 120 }}>
       <FormControl sx={{ width: 500, marginTop: 1 }}>
