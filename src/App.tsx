@@ -5,7 +5,8 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import BasicSelect from "./components/BasicSelect";
 
 type arrayData = [
   {
@@ -18,29 +19,45 @@ function App() {
   const [loadingStage, setLoadingStage] = useState("");
   const [dataArray, setDataArray] = useState<arrayData | undefined>();
 
-  async function getData() {
-    try {
-      setLoadingStage("Loading");
-      const response = await fetch(
-        "https://api.stackexchange.com/2.3/tags?order=desc&sort=popular&site=stackoverflow"
-      );
-      const data = await response.json();
-      setDataArray(data.items);
-      setLoadingStage("Success");
-    } catch (error) {
-      setLoadingStage("Error");
-    }
-  }
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        setLoadingStage("Loading");
+        const response = await fetch(
+          "https://api.stackexchange.com/2.3/tags?pagesize=10&order=desc&sort=popular&site=stackoverflow"
+        );
+        const data = await response.json();
+        setDataArray(data.items);
+        setLoadingStage("Success");
+      } catch (error) {
+        setLoadingStage("Error");
+      }
+    };
+    getData();
+  }, []);
 
   return (
     <>
-      <button onClick={getData}>Click</button>
+      <input
+        type="number"
+        id="page-size"
+        name="page-size"
+        min="1"
+        max="50"
+        placeholder="Page size"
+        style={{ width: 150 }}
+      />
+      <BasicSelect
+        label={"Pole"}
+        arrayValues={["popular", "activity", "name"]}
+      />
+      <BasicSelect label={"Order"} arrayValues={["ascending", "descending"]} />
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Nazwa</TableCell>
-              <TableCell align="right">Liczba powiązanych postów</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell align="right">Count</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
