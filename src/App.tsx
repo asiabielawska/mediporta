@@ -10,6 +10,7 @@ import { SelectChangeEvent } from "@mui/material/Select";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { Button } from "@mui/material";
+import { useSetNewValue } from "./hooks/useSetNewValue";
 
 type arrayData = [
   {
@@ -19,57 +20,29 @@ type arrayData = [
 ];
 
 function App() {
-  const [loadingStage, setLoadingStage] = useState("");
-
+  const [value, setNewValue] = useSetNewValue();
   const [dataArray, setDataArray] = useState<arrayData | undefined>();
-
-  const [sortValue, setSortValue] = useState("popular");
-  const sortHandleChange = (event: SelectChangeEvent) => {
-    setSortValue(event.target.value as string);
-  };
-
-  const [orderValue, setOrderValue] = useState("desc");
-  const orderHandleChange = (event: SelectChangeEvent) => {
-    setOrderValue(event.target.value as string);
-  };
-
-  const [inputValue, setInputValue] = useState("5");
-  const inputValueHandleChange = (event: SelectChangeEvent) => {
-    setInputValue(event.target.value);
-  };
-
-  const [page, setPage] = useState(1);
-  const pageUp = () => {
-    setPage(page + 1);
-  };
-
-  const pageDown = () => {
-    if (page === 1) {
-      return;
-    }
-    setPage(page - 1);
-  };
 
   useEffect(() => {
     const getData = async () => {
       try {
-        setLoadingStage("Loading");
+        setNewValue((prev) => ({ ...prev, loadingStage: "Loading" }));
         const response = await fetch(
-          `https://api.stackexchange.com/2.3/tags?page=${page}&pagesize=${inputValue}&order=${orderValue}&sort=${sortValue}&site=stackoverflow`
+          `https://api.stackexchange.com/2.3/tags?page=${value.page}&pagesize=${value.inputValue}&order=${value.orderValue}&sort=${value.sortValue}&site=stackoverflow`
         );
         if (!response.ok) {
-          setLoadingStage("Error");
+          setNewValue((prev) => ({ ...prev, loadingStage: "Error" }));
           return;
         }
         const data = await response.json();
         setDataArray(data.items);
-        setLoadingStage("Success");
+        setNewValue((prev) => ({ ...prev, loadingStage: "Success" }));
       } catch (error) {
-        setLoadingStage("Error");
+        setNewValue((prev) => ({ ...prev, loadingStage: "Error" }));
       }
     };
     getData();
-  }, [sortValue, orderValue, inputValue, page]);
+  }, [value.sortValue, value.orderValue, value.inputValue, value.page]);
 
   return (
     <>
@@ -79,20 +52,32 @@ function App() {
         min="1"
         max="100"
         style={{ width: 150, marginTop: 10 }}
-        value={inputValue}
-        onChange={inputValueHandleChange}
+        value={value.inputValue}
+        onChange={(event: SelectChangeEvent) => {
+          setNewValue((prev) => ({ ...prev, inputValue: event.target.value }));
+        }}
       />
       <BasicSelect
         label={"Sort"}
         arrayValues={["popular", "activity", "name"]}
-        value={sortValue}
-        handleChange={sortHandleChange}
+        value={value.sortValue}
+        handleChange={(event: SelectChangeEvent) => {
+          setNewValue((prev) => ({
+            ...prev,
+            sortValue: event.target.value as string,
+          }));
+        }}
       />
       <BasicSelect
         label={"Order"}
         arrayValues={["asc", "desc"]}
-        value={orderValue}
-        handleChange={orderHandleChange}
+        value={value.orderValue}
+        handleChange={(event: SelectChangeEvent) => {
+          setNewValue((prev) => ({
+            ...prev,
+            orderValue: event.target.value as string,
+          }));
+        }}
       />
       <TableContainer>
         <Table sx={{ width: "50%" }} aria-label="simple table">
@@ -118,14 +103,29 @@ function App() {
           </TableBody>
         </Table>
       </TableContainer>
-      <Button variant="outlined" onClick={pageDown} title="Previous page">
+      <Button
+        variant="outlined"
+        onClick={() => {
+          if (value.page === 1) {
+            return;
+          }
+          setNewValue((prev) => ({ ...prev, page: prev.page - 1 }));
+        }}
+        title="Previous page"
+      >
         <ArrowBackIosIcon />
       </Button>
-      <Button variant="outlined" onClick={pageUp} title="Next page">
+      <Button
+        variant="outlined"
+        onClick={() => {
+          setNewValue((prev) => ({ ...prev, page: prev.page + 1 }));
+        }}
+        title="Next page"
+      >
         <ArrowForwardIosIcon />
       </Button>
 
-      {loadingStage && <div>{loadingStage}</div>}
+      {value.loadingStage && <div>{value.loadingStage}</div>}
     </>
   );
 }
