@@ -7,6 +7,9 @@ import TableRow from "@mui/material/TableRow";
 import { useEffect, useState } from "react";
 import BasicSelect from "./components/BasicSelect";
 import { SelectChangeEvent } from "@mui/material/Select";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import { Button } from "@mui/material";
 
 type arrayData = [
   {
@@ -35,12 +38,24 @@ function App() {
     setInputValue(event.target.value);
   };
 
+  const [page, setPage] = useState(1);
+  const pageUp = () => {
+    setPage(page + 1);
+  };
+
+  const pageDown = () => {
+    if (page === 1) {
+      return;
+    }
+    setPage(page - 1);
+  };
+
   useEffect(() => {
     const getData = async () => {
       try {
         setLoadingStage("Loading");
         const response = await fetch(
-          `https://api.stackexchange.com/2.3/tags?pagesize=${inputValue}&order=${orderValue}&sort=${sortValue}&site=stackoverflow`
+          `https://api.stackexchange.com/2.3/tags?page=${page}&pagesize=${inputValue}&order=${orderValue}&sort=${sortValue}&site=stackoverflow`
         );
         if (!response.ok) {
           setLoadingStage("Error");
@@ -54,7 +69,7 @@ function App() {
       }
     };
     getData();
-  }, [sortValue, orderValue, inputValue]);
+  }, [sortValue, orderValue, inputValue, page]);
 
   return (
     <>
@@ -103,6 +118,12 @@ function App() {
           </TableBody>
         </Table>
       </TableContainer>
+      <Button variant="outlined" onClick={pageDown} title="Previous page">
+        <ArrowBackIosIcon />
+      </Button>
+      <Button variant="outlined" onClick={pageUp} title="Next page">
+        <ArrowForwardIosIcon />
+      </Button>
 
       {loadingStage && <div>{loadingStage}</div>}
     </>
