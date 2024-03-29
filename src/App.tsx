@@ -9,9 +9,17 @@ import BasicSelect from "./components/BasicSelect";
 import { SelectChangeEvent } from "@mui/material/Select";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import { useQueryParams } from "./hooks/useQueryParam";
-import { Input } from "./styled";
+import {
+  Error,
+  Input,
+  InputContainer,
+  Loader,
+  MainContainer,
+  SortingParameters,
+} from "./styled";
+import { TagRow } from "./components/TableRow/TagRow";
 
 type TagsData = {
   name: string;
@@ -45,88 +53,104 @@ function App() {
   }, [queryParam]);
 
   return (
-    <>
-      <div>Type or pick page size form 1 to 100:</div>
-      <Input
-        type="number"
-        min="1"
-        max="100"
-        value={queryParam.inputValue}
-        onChange={(event: SelectChangeEvent) => {
-          setQueryParam((prev) => ({
-            ...prev,
-            inputValue: event.target.value,
-          }));
+    <MainContainer>
+      <SortingParameters>
+        <InputContainer>
+          <div>Page size:</div>
+          <Input
+            type="number"
+            min="1"
+            max="100"
+            value={queryParam.inputValue}
+            onChange={(event: SelectChangeEvent) => {
+              setQueryParam((prev) => ({
+                ...prev,
+                inputValue: event.target.value,
+              }));
+            }}
+          />
+        </InputContainer>
+        <BasicSelect
+          label={"Sort"}
+          arrayValues={["popular", "activity", "name"]}
+          value={queryParam.sortValue}
+          handleChange={(event: SelectChangeEvent) => {
+            setQueryParam((prev) => ({
+              ...prev,
+              sortValue: event.target.value,
+            }));
+          }}
+        />
+        <BasicSelect
+          label={"Order"}
+          arrayValues={["asc", "desc"]}
+          value={queryParam.orderValue}
+          handleChange={(event: SelectChangeEvent) => {
+            setQueryParam((prev) => ({
+              ...prev,
+              orderValue: event.target.value,
+            }));
+          }}
+        />
+      </SortingParameters>
+      <TableContainer
+        sx={{
+          width: "50%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
-      />
-      <BasicSelect
-        label={"Sort"}
-        arrayValues={["popular", "activity", "name"]}
-        value={queryParam.sortValue}
-        handleChange={(event: SelectChangeEvent) => {
-          setQueryParam((prev) => ({
-            ...prev,
-            sortValue: event.target.value,
-          }));
-        }}
-      />
-      <BasicSelect
-        label={"Order"}
-        arrayValues={["asc", "desc"]}
-        value={queryParam.orderValue}
-        handleChange={(event: SelectChangeEvent) => {
-          setQueryParam((prev) => ({
-            ...prev,
-            orderValue: event.target.value,
-          }));
-        }}
-      />
-      <TableContainer>
-        <Table sx={{ width: "50%" }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell align="right">Count</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {dataArray.map((element) => (
-              <TableRow
-                key={element.name}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell component="th" scope="row">
-                  {element.name}
-                </TableCell>
-                <TableCell align="right">{element.count}</TableCell>
+      >
+        {loadingStage === "Success" && (
+          <Table aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell align="right">Count</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {dataArray.map((element) => (
+                <TagRow
+                  key={element.name}
+                  name={element.name}
+                  count={element.count}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        )}
+        {loadingStage === "Loading" && (
+          <Loader>
+            <CircularProgress color="inherit" />
+          </Loader>
+        )}
+        {loadingStage === "Error" && <Error>ERROR</Error>}
       </TableContainer>
-      <Button
-        variant="outlined"
-        onClick={() => {
-          if (queryParam.page === 1) {
-            return;
-          }
-          setQueryParam((prev) => ({ ...prev, page: prev.page - 1 }));
-        }}
-        title="Previous page"
-      >
-        <ArrowBackIosIcon />
-      </Button>
-      <Button
-        variant="outlined"
-        onClick={() => {
-          setQueryParam((prev) => ({ ...prev, page: prev.page + 1 }));
-        }}
-        title="Next page"
-      >
-        <ArrowForwardIosIcon />
-      </Button>
-      {loadingStage && <div>{loadingStage}</div>}
-    </>
+      <div>
+        <Button
+          color="inherit"
+          onClick={() => {
+            if (queryParam.page === 1) {
+              return;
+            }
+            setQueryParam((prev) => ({ ...prev, page: prev.page - 1 }));
+          }}
+          title="Previous page"
+        >
+          <ArrowBackIosIcon />
+        </Button>
+        <Button
+          color="inherit"
+          onClick={() => {
+            setQueryParam((prev) => ({ ...prev, page: prev.page + 1 }));
+          }}
+          title="Next page"
+        >
+          <ArrowForwardIosIcon />
+        </Button>
+      </div>
+    </MainContainer>
   );
 }
 

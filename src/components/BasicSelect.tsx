@@ -19,7 +19,7 @@ export default function BasicSelect({
 }: Props) {
   return (
     <Box sx={{ minWidth: 120 }}>
-      <FormControl sx={{ width: 500, marginTop: 1 }}>
+      <FormControl>
         <InputLabel>{label}</InputLabel>
         <Select value={value} label={label} onChange={handleChange}>
           {arrayValues.map((element) => (
