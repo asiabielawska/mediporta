@@ -1,16 +1,14 @@
 import { useState } from "react";
 
-type Data = {
-  loadingStage: string;
+type QueryParamsData = {
   sortValue: string;
   orderValue: string;
   inputValue: string;
   page: number;
 };
 
-export const useSetNewValue = () => {
-  const [value, setNewValue] = useState<Data>({
-    loadingStage: "",
+export const useQueryParams = () => {
+  const [value, setNewValue] = useState<QueryParamsData>({
     sortValue: "popular",
     orderValue: "desc",
     inputValue: "5",

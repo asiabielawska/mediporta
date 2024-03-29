@@ -10,72 +10,74 @@ import { SelectChangeEvent } from "@mui/material/Select";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { Button } from "@mui/material";
-import { useSetNewValue } from "./hooks/useSetNewValue";
+import { useQueryParams } from "./hooks/useQueryParam";
+import { Input } from "./styled";
 
-type arrayData = [
-  {
-    name: string;
-    count: number;
-  }
-];
+type TagsData = {
+  name: string;
+  count: number;
+}[];
 
 function App() {
-  const [value, setNewValue] = useSetNewValue();
-  const [dataArray, setDataArray] = useState<arrayData | undefined>();
+  const [queryParam, setQueryParam] = useQueryParams();
+  const [dataArray, setDataArray] = useState<TagsData>([]);
+  const [loadingStage, setLoadingStage] = useState("");
 
   useEffect(() => {
     const getData = async () => {
       try {
-        setNewValue((prev) => ({ ...prev, loadingStage: "Loading" }));
+        setLoadingStage("Loading");
         const response = await fetch(
-          `https://api.stackexchange.com/2.3/tags?page=${value.page}&pagesize=${value.inputValue}&order=${value.orderValue}&sort=${value.sortValue}&site=stackoverflow`
+          `https://api.stackexchange.com/2.3/tags?page=${queryParam.page}&pagesize=${queryParam.inputValue}&order=${queryParam.orderValue}&sort=${queryParam.sortValue}&site=stackoverflow`
         );
         if (!response.ok) {
-          setNewValue((prev) => ({ ...prev, loadingStage: "Error" }));
+          setLoadingStage("Error");
           return;
         }
         const data = await response.json();
         setDataArray(data.items);
-        setNewValue((prev) => ({ ...prev, loadingStage: "Success" }));
+        setLoadingStage("Success");
       } catch (error) {
-        setNewValue((prev) => ({ ...prev, loadingStage: "Error" }));
+        setLoadingStage("Error");
       }
     };
     getData();
-  }, [value.sortValue, value.orderValue, value.inputValue, value.page]);
+  }, [queryParam]);
 
   return (
     <>
       <div>Type or pick page size form 1 to 100:</div>
-      <input
+      <Input
         type="number"
         min="1"
         max="100"
-        style={{ width: 150, marginTop: 10 }}
-        value={value.inputValue}
+        value={queryParam.inputValue}
         onChange={(event: SelectChangeEvent) => {
-          setNewValue((prev) => ({ ...prev, inputValue: event.target.value }));
+          setQueryParam((prev) => ({
+            ...prev,
+            inputValue: event.target.value,
+          }));
         }}
       />
       <BasicSelect
         label={"Sort"}
         arrayValues={["popular", "activity", "name"]}
-        value={value.sortValue}
+        value={queryParam.sortValue}
         handleChange={(event: SelectChangeEvent) => {
-          setNewValue((prev) => ({
+          setQueryParam((prev) => ({
             ...prev,
-            sortValue: event.target.value as string,
+            sortValue: event.target.value,
           }));
         }}
       />
       <BasicSelect
         label={"Order"}
         arrayValues={["asc", "desc"]}
-        value={value.orderValue}
+        value={queryParam.orderValue}
         handleChange={(event: SelectChangeEvent) => {
-          setNewValue((prev) => ({
+          setQueryParam((prev) => ({
             ...prev,
-            orderValue: event.target.value as string,
+            orderValue: event.target.value,
           }));
         }}
       />
@@ -88,28 +90,27 @@ function App() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {dataArray &&
-              dataArray.map((element) => (
-                <TableRow
-                  key={element.name}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {element.name}
-                  </TableCell>
-                  <TableCell align="right">{element.count}</TableCell>
-                </TableRow>
-              ))}
+            {dataArray.map((element) => (
+              <TableRow
+                key={element.name}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TableCell component="th" scope="row">
+                  {element.name}
+                </TableCell>
+                <TableCell align="right">{element.count}</TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
       <Button
         variant="outlined"
         onClick={() => {
-          if (value.page === 1) {
+          if (queryParam.page === 1) {
             return;
           }
-          setNewValue((prev) => ({ ...prev, page: prev.page - 1 }));
+          setQueryParam((prev) => ({ ...prev, page: prev.page - 1 }));
         }}
         title="Previous page"
       >
@@ -118,14 +119,13 @@ function App() {
       <Button
         variant="outlined"
         onClick={() => {
-          setNewValue((prev) => ({ ...prev, page: prev.page + 1 }));
+          setQueryParam((prev) => ({ ...prev, page: prev.page + 1 }));
         }}
         title="Next page"
       >
         <ArrowForwardIosIcon />
       </Button>
-
-      {value.loadingStage && <div>{value.loadingStage}</div>}
+      {loadingStage && <div>{loadingStage}</div>}
     </>
   );
 }
