@@ -1,32 +1,30 @@
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { useEffect, useState } from "react";
-import BasicSelect from "./components/BasicSelect";
+import { BasicSelect } from "./components/BasicSelect";
 import { SelectChangeEvent } from "@mui/material/Select";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import { Button, CircularProgress } from "@mui/material";
 import { useQueryParams } from "./hooks/useQueryParam";
 import {
   Error,
   Input,
   InputContainer,
-  Loader,
   MainContainer,
   SortingParameters,
+  TableContainer,
 } from "./styled";
-import { TagRow } from "./components/TableRow/TagRow";
+import { TagRow } from "./components/TagRow/TagRow";
+import { Loader } from "./components/Loader/Loader";
+import { PaginationButton } from "./components/PaginationButton";
 
 type TagsData = {
   name: string;
   count: number;
 }[];
 
-function App() {
+export const App = () => {
   const [queryParam, setQueryParam] = useQueryParams();
   const [dataArray, setDataArray] = useState<TagsData>([]);
   const [loadingStage, setLoadingStage] = useState("");
@@ -93,14 +91,7 @@ function App() {
           }}
         />
       </SortingParameters>
-      <TableContainer
-        sx={{
-          width: "50%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
+      <TableContainer>
         {loadingStage === "Success" && (
           <Table aria-label="simple table">
             <TableHead>
@@ -120,38 +111,26 @@ function App() {
             </TableBody>
           </Table>
         )}
-        {loadingStage === "Loading" && (
-          <Loader>
-            <CircularProgress color="inherit" />
-          </Loader>
-        )}
-        {loadingStage === "Error" && <Error>ERROR</Error>}
+        {loadingStage === "Loading" && <Loader />}
+        {loadingStage === "Error" && <Error>Oops..something went wrong</Error>}
       </TableContainer>
       <div>
-        <Button
-          color="inherit"
+        <PaginationButton
           onClick={() => {
             if (queryParam.page === 1) {
               return;
             }
             setQueryParam((prev) => ({ ...prev, page: prev.page - 1 }));
           }}
-          title="Previous page"
-        >
-          <ArrowBackIosIcon />
-        </Button>
-        <Button
-          color="inherit"
+          type="previous"
+        />
+        <PaginationButton
           onClick={() => {
             setQueryParam((prev) => ({ ...prev, page: prev.page + 1 }));
           }}
-          title="Next page"
-        >
-          <ArrowForwardIosIcon />
-        </Button>
+          type="next"
+        />
       </div>
     </MainContainer>
   );
-}
-
-export default App;
+};

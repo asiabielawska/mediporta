@@ -11,12 +11,12 @@ type Props = {
   handleChange: (event: SelectChangeEvent) => void;
 };
 
-export default function BasicSelect({
+export const BasicSelect = ({
   label,
   arrayValues,
   value,
   handleChange,
-}: Props) {
+}: Props) => {
   return (
     <Box sx={{ minWidth: 120 }}>
       <FormControl>
@@ -31,4 +31,4 @@ export default function BasicSelect({
       </FormControl>
     </Box>
   );
-}
+};
